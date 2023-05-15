@@ -109,7 +109,7 @@ def extract_links_without_images(url,links,code_source): #renvoi les liens sur l
     soup = BeautifulSoup(code_source, 'html.parser')
     for link in soup.find_all('a'):
         href = link.get('href')
-        if href is not None and href.startswith(url)and not href.endswith(extensions_images): 
+        if href is not None and href.startswith(url)and not href.endswith(extensions_images) not in links: 
             links.add(href)  # Ajouter le lien à l'ensemble
 
 
