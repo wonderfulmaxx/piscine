@@ -4,8 +4,6 @@ import sys
 import os
 import urllib.parse
 import urllib.request
-from urllib.parse import urlparse
-# from PIL import Image
 from bs4 import BeautifulSoup
 
 
@@ -30,7 +28,7 @@ def parsing(recursive,level,path,nb_args):
             recursive = True
         elif sys.argv[counter] == "-l":
             if counter + 1 < nb_args - 1 and sys.argv[counter + 1].isdigit() and not re.match(r'^-', sys.argv[counter+1]):
-                level = sys.argv[counter+1]
+                level = int(sys.argv[counter+1])
                 counter += 1
             else:
                 print("Enter a maximum depht level after -l")
@@ -39,6 +37,9 @@ def parsing(recursive,level,path,nb_args):
             if not re.match(r'^https?://', sys.argv[counter]):
                 print("Please enter a valid url")
                 sys.exit(1)
+        else:
+            print ("Error: ",sys.argv[counter] , "is not a valid argument")
+            sys.exit(1)
         counter += 1
 
     return (recursive,level,path)
@@ -54,6 +55,7 @@ def recuperer_code_source(url): #recupere tout le code source de la page et le r
         else:
             return None
     except requests.exceptions.RequestException :
+        print ("URL=" , url)
         print("Échec de la récupération du code source.")
         sys.exit(1)
 
@@ -64,7 +66,6 @@ def extraire_image_urls(code_source): #recupere l'url des images et le renvoi a 
     
     
     pattern = r'(https?://\S+\.(?:jpg|jpeg|png|gif|bmp).*?)'
-    #pattern = r'(http\S+\.(?:jpg|jpeg|gif|png|bmp)\S*)'
     urls = re.findall(pattern, code_source)
 
     return urls
@@ -103,24 +104,24 @@ def save_url_as_file(url,path): #sauvegarde les images dans un fichier
 
 
 
-def extract_links_without_images(links,text,url): #renvoi les liens sur la page actuelle dans un tableau
-    soup = BeautifulSoup(text, 'html.parser')
-    links.add(url)
+def extract_links_without_images(url,links,code_source): #renvoi les liens sur la page actuelle dans un tableau
+    extensions_images = (".jpg", ".jpeg", ".png", ".gif", ".bmp")
+    soup = BeautifulSoup(code_source, 'html.parser')
     for link in soup.find_all('a'):
         href = link.get('href')
-        if href is not None and href.startswith('https') and url in href:
+        if href is not None and href.startswith(url)and not href.endswith(extensions_images): 
             links.add(href)  # Ajouter le lien à l'ensemble
 
 
 
-def recursif_main(links, url,level, level_i ):  
-    if level_i<level:
-        for link in links:
-            print("hihi")
+def recursif_main(url,links,level, level_i ):  
+    if level_i < level:
+        links_copy = links.copy()  # Créer une copie de l'ensemble
+        for link in links_copy:
             code_source = recuperer_code_source(link)
-            extract_links_without_images(links,code_source,url)
-            level_i += 1
-            recursif_main(links, link, level,level_i)
+            extract_links_without_images(url,links,code_source)
+        level_i += 1
+        recursif_main(url,links, level,level_i)
 
 
 
@@ -142,20 +143,14 @@ recursive,level,path = parsing(recursive,level,path,nb_args)
 
 links.add(url)
 if recursive:
-    recursif_main(links, url, level, level_i)
+    recursif_main(url,links, level, level_i)
     
 
 for link in links:
     code_source = recuperer_code_source(link)
     if code_source is not None:
-        image_urls = extraire_image_urls(code_source)
+        image_urls = extraire_image_urls(code_source)  
         for url in image_urls:
             save_url_as_file(url,path)
 
-    # if recursive:
-    #     for link in links:
-    #         print(link)
-
-else:
-    print ("Acces granted")
 
