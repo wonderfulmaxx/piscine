@@ -3,6 +3,7 @@ import requests
 import sys
 import os
 import urllib.parse
+from urllib.parse import urljoin
 import urllib.request
 from bs4 import BeautifulSoup
 
@@ -57,7 +58,7 @@ def recuperer_code_source(url): #recupere tout le code source de la page et le r
     except requests.exceptions.RequestException :
         print ("URL=" , url)
         print("Échec de la récupération du code source.")
-        sys.exit(1)
+        # sys.exit(1)
 
 
 
@@ -111,6 +112,11 @@ def extract_links_without_images(url,links,code_source): #renvoi les liens sur l
         href = link.get('href')
         if href is not None and href.startswith(url)and not href.endswith(extensions_images) not in links: 
             links.add(href)  # Ajouter le lien à l'ensemble
+        elif href is not None and href.startswith('/'): 
+            full_url = urljoin(url,href)
+            if full_url not in links:
+                print ("here -" ,full_url)
+                links.add(full_url)
 
 
 
@@ -119,7 +125,8 @@ def recursif_main(url,links,level, level_i ):
         links_copy = links.copy()  # Créer une copie de l'ensemble
         for link in links_copy:
             code_source = recuperer_code_source(link)
-            extract_links_without_images(url,links,code_source)
+            if code_source is not None:
+                extract_links_without_images(url,links,code_source)
         level_i += 1
         recursif_main(url,links, level,level_i)
 
