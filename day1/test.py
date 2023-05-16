@@ -9,6 +9,10 @@ with open("starting.key", "r") as file:
 
 B = Fernet(key)   # on a la key
 
+hex_key = key.hex()
+
+# Print the hexadecimal key
+print(hex_key)
 
 #------------recuperation de token (A)--------#
 

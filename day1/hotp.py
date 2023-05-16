@@ -1,10 +1,11 @@
 import hashlib
 import time
+import hmac
 
 # Fonction pour générer un TOTP
 def generate_totp(secret_key):
 
-	interval = 60 # Intervalle en secondes pour le TOTP
+	interval = 30 # Intervalle en secondes pour le TOTP
 
 	# print ("time =" , time.time())
 
@@ -22,9 +23,11 @@ def generate_totp(secret_key):
 	# print("counter_bytes =" , counter_bytes)
 	# print("key = ", secret_key)
     # Calcul du HMAC-SHA1
-	hmac_result = hashlib.sha1(secret_key + counter_bytes).digest()
+	# hmac_result = hashlib.sha1(secret_key + counter_bytes).digest()
+	hmac_result = hmac.new(secret_key, counter_bytes, hashlib.sha1).digest()
 
-	# print ("hmac_result = " , hmac_result)
+	print ("hmac_result = " , hmac_result)
+	# print ("hmac_result2= " , hmac_result2)
 
     # Récupération de l'offset et génération de l'OTP
 	offset = hmac_result[-1] & 0x0F  # Dernier octet du résultat HMAC
@@ -40,7 +43,7 @@ def generate_totp(secret_key):
 
 
 # Clé secrète partagée entre le client et le serveur
-secret_key = b'tm_OWs5LOeG9-Uk8HXnGizq9zne0EZ-Qz9udcMciMeQ='
+secret_key = b'1a4b583e2fd85193b285e501d7044809d9d5df8189b2f23c10b358fe2a2ef5dd'
 
 # Générer un TOTP
 totp = generate_totp(secret_key)
