@@ -72,7 +72,6 @@ def extraire_image_urls(code_source): #recupere l'url des images et le renvoi a 
     return urls
 
 
-
 def save_url_as_file(url,path): #sauvegarde les images dans un fichier
     #creer dossier
     if not os.path.exists(path):
